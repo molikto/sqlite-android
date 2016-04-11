@@ -77,4 +77,6 @@ public abstract class SQLiteClosable implements Closeable {
     public void close() {
         releaseReference();
     }
+
+
 }

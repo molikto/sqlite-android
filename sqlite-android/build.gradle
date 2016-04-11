@@ -5,7 +5,6 @@ plugins {
 apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 apply plugin: 'de.undercouch.download'
-apply plugin: 'com.jfrog.bintray'
 
 import de.undercouch.gradle.tasks.download.Download
 
@@ -13,16 +12,16 @@ group = 'io.requery'
 version = '3.12.0'
 description = 'Android SQLite compatibility library'
 
-gradle.projectsEvaluated {
-    preBuild.dependsOn(buildSqlite)
-}
+//gradle.projectsEvaluated {
+//    preBuild.dependsOn(buildSqlite)
+//}
 
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
 
     defaultConfig {
-        minSdkVersion 15
+        minSdkVersion 14
         targetSdkVersion 23
         versionCode 1
         versionName project.version
@@ -47,7 +46,7 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:23.1.1'
+    compile 'com.android.support:support-v4:23.3.0'
     androidTestCompile 'com.android.support.test:runner:0.4'
     androidTestCompile 'com.android.support.test:rules:0.4'
 }
@@ -81,63 +80,11 @@ ext {
 }
 
 android.libraryVariants
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId project.group
-            artifactId project.name
-            version project.version
-            artifact "build/outputs/aar/${project.name}-release.aar"
-            artifact sourcesJar
-            artifact(javadocJar) {
-                classifier 'javadoc'
-            }
-            pom.withXml {
-                asNode().children().last() + project.pomXml
-            }
-        }
-    }
-}
 
 Properties properties = new Properties()
 File localProperties = project.rootProject.file('local.properties')
 if (localProperties.exists()) {
     properties.load(localProperties.newDataInputStream())
-}
-
-bintray {
-    user = properties.getProperty('bintray.user')
-    key = properties.getProperty('bintray.apikey')
-    publications = ['maven']
-    pkg {
-        repo = 'requery'
-        name = 'sqlite-android'
-        userOrg = 'requery'
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/requery/sqlite-android.git'
-        version {
-            name = project.version
-            desc = project.description
-            released = new Date()
-        }
-    }
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from android.sourceSets.main.java.srcDirs
-}
-
-task javadoc(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    classpath += configurations.compile
-    failOnError false;
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
 }
 
 task downloadSqlite(type: Download) {
@@ -153,9 +100,9 @@ task installSqlite(dependsOn: downloadSqlite, type: Copy) {
     into 'src/main/jni/sqlite'
 }
 
-def ndkDir = System.getenv('ANDROID_NDK_HOME') ?: properties.getProperty('ndk.dir')
+//def ndkDir = System.getenv('ANDROID_NDK_HOME') ?: properties.getProperty('ndk.dir')
 
 task buildSqlite(dependsOn: installSqlite, type: Exec) {
     workingDir 'src/main/jni'
-    commandLine ndkDir + '/ndk-build'
+    commandLine 'ndk-build'
 }

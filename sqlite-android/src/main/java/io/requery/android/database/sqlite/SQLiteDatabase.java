@@ -409,7 +409,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * </pre>
      */
     public void beginTransaction() {
-        beginTransaction(null /* transactionStatusCallback */, true);
+        beginTransaction(null /* transactionStatusCallback */, SQLiteSession.TRANSACTION_MODE_EXCLUSIVE, false);
     }
 
     /**
@@ -433,7 +433,11 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * </pre>
      */
     public void beginTransactionNonExclusive() {
-        beginTransaction(null /* transactionStatusCallback */, false);
+        beginTransaction(null /* transactionStatusCallback */, SQLiteSession.TRANSACTION_MODE_IMMEDIATE, false);
+    }
+
+    public void beginTransactionDeferredReadOnly() {
+        beginTransaction(null /* transactionStatusCallback */, SQLiteSession.TRANSACTION_MODE_DEFERRED, true);
     }
 
     /**
@@ -461,9 +465,9 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * commits, or is rolled back, either explicitly or by a call to
      * {@link #yieldIfContendedSafely}.
      */
-    public void beginTransactionWithListener(SQLiteTransactionListener transactionListener) {
-        beginTransaction(transactionListener, true);
-    }
+//    public void beginTransactionWithListener(SQLiteTransactionListener transactionListener) {
+//        beginTransaction(transactionListener, true);
+//    }
 
     /**
      * Begins a transaction in IMMEDIATE mode. Transactions can be nested. When
@@ -489,20 +493,19 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *            transaction begins, commits, or is rolled back, either
      *            explicitly or by a call to {@link #yieldIfContendedSafely}.
      */
-    public void beginTransactionWithListenerNonExclusive(
-            SQLiteTransactionListener transactionListener) {
-        beginTransaction(transactionListener, false);
-    }
+//    public void beginTransactionWithListenerNonExclusive(
+//            SQLiteTransactionListener transactionListener) {
+//        beginTransaction(transactionListener, false);
+//    }
 
     private void beginTransaction(SQLiteTransactionListener transactionListener,
-            boolean exclusive) {
+            int mode, boolean readOnly) {
         acquireReference();
         try {
             getThreadSession().beginTransaction(
-                    exclusive ? SQLiteSession.TRANSACTION_MODE_EXCLUSIVE :
-                            SQLiteSession.TRANSACTION_MODE_IMMEDIATE,
+                    mode,
                     transactionListener,
-                    getThreadDefaultConnectionFlags(false /*readOnly*/), null);
+                    getThreadDefaultConnectionFlags(readOnly), null);
         } finally {
             releaseReference();
         }
@@ -1605,9 +1608,6 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * @throws SQLException if the SQL string is invalid
      */
     public void execSQL(String sql, Object[] bindArgs) throws SQLException {
-        if (bindArgs == null) {
-            throw new IllegalArgumentException("Empty bindArgs");
-        }
         executeSql(sql, bindArgs);
     }
 
@@ -2126,6 +2126,11 @@ public final class SQLiteDatabase extends SQLiteClosable {
                     + "' is not open.");
         }
     }
+
+    public int getConnectionCount() {
+        return mConnectionPoolLocked.getConnectionCount();
+    }
+
 
     /**
      * Used to allow returning sub-classes of {@link Cursor} when calling query.

@@ -96,6 +96,10 @@ public final class SQLiteConnectionPool implements Closeable {
     private final ArrayList<SQLiteConnection> mAvailableNonPrimaryConnections = new ArrayList<>();
     private SQLiteConnection mAvailablePrimaryConnection;
 
+    public int getConnectionCount() {
+        return mAvailableNonPrimaryConnections.size() + 1;
+    }
+
     // Describes what should happen to an acquired connection when it is returned to the pool.
     enum AcquiredConnectionStatus {
         // The connection should be returned to the pool as usual.
