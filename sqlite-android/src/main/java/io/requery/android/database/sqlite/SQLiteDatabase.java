@@ -1841,7 +1841,6 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * transaction was begun.
      * </p><p>
      * Writers should use {@link #beginTransactionNonExclusive()} or
-     * {@link #beginTransactionWithListenerNonExclusive(SQLiteTransactionListener)}
      * to start a transaction.  Non-exclusive mode allows database file to be in readable
      * by other threads executing queries.
      * </p><p>
