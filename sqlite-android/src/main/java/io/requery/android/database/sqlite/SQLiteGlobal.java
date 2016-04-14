@@ -109,7 +109,7 @@ public final class SQLiteGlobal {
      * Gets the connection pool size when in WAL mode.
      */
     public static int getWALConnectionPoolSize() {
-        int value = 10;
+        int value = 5;
         return Math.max(2, value);
     }
 }
