@@ -170,8 +170,7 @@ public abstract class AbstractWindowedCursor extends AbstractCursor {
     }
 
     @Override
-    public void deactivate() {
-        super.deactivate();
-        closeWindow();
+    protected void onDeactivateOrClose() {
+        super.onDeactivateOrClose();
     }
 }
