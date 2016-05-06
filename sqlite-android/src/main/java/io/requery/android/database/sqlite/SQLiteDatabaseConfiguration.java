@@ -63,6 +63,7 @@ public final class SQLiteDatabaseConfiguration {
      */
     public int openFlags;
 
+
     /**
      * The maximum size of the prepared statement cache for each database connection.
      * Must be non-negative.

@@ -36,8 +36,6 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Printer;
-import io.requery.android.database.DatabaseErrorHandler;
-import io.requery.android.database.DefaultDatabaseErrorHandler;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -45,6 +43,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.WeakHashMap;
+
+import io.requery.android.database.DatabaseErrorHandler;
+import io.requery.android.database.DefaultDatabaseErrorHandler;
 
 /**
  * Exposes methods to manage a SQLite database.
@@ -249,6 +250,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * @see #enableWriteAheadLogging
      */
     public static final int ENABLE_WRITE_AHEAD_LOGGING = 0x20000000;
+    public static final int DISABLE_SHARE_PRIMARY_CONNECTION = 0x00010000;
 
     /**
      * Absolute max value that can be set by {@link #setMaxSqlCacheSize(int)}.

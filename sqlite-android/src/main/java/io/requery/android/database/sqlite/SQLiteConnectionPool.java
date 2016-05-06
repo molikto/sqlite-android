@@ -614,17 +614,26 @@ public final class SQLiteConnectionPool implements Closeable {
 
             // Try to acquire a connection.
             SQLiteConnection connection = null;
-            if (!wantPrimaryConnection) {
-                connection = tryAcquireNonPrimaryConnectionLocked(
+            if ((mConfiguration.openFlags & SQLiteDatabase.DISABLE_SHARE_PRIMARY_CONNECTION) != 0) {
+                if (!wantPrimaryConnection) {
+                    connection = tryAcquireNonPrimaryConnectionLocked(
                         sql, connectionFlags); // might throw
+                } else {
+                    connection = tryAcquirePrimaryConnectionLocked(connectionFlags); // might throw
+                }
+            } else {
+                if (!wantPrimaryConnection) {
+                    connection = tryAcquireNonPrimaryConnectionLocked(
+                        sql, connectionFlags); // might throw
+                }
+                if (connection == null) {
+                    connection = tryAcquirePrimaryConnectionLocked(connectionFlags); // might throw
+                }
             }
-            if (connection == null) {
-                connection = tryAcquirePrimaryConnectionLocked(connectionFlags); // might throw
-            }
+
             if (connection != null) {
                 return connection;
             }
-
             // No connections available.  Enqueue a waiter in priority order.
             final int priority = getPriority(connectionFlags);
             final long startTime = SystemClock.uptimeMillis();
@@ -801,18 +810,39 @@ public final class SQLiteConnectionPool implements Closeable {
             } else {
                 try {
                     SQLiteConnection connection = null;
-                    if (!waiter.mWantPrimaryConnection && !nonPrimaryConnectionNotAvailable) {
-                        connection = tryAcquireNonPrimaryConnectionLocked(
-                                waiter.mSql, waiter.mConnectionFlags); // might throw
-                        if (connection == null) {
-                            nonPrimaryConnectionNotAvailable = true;
+                    if ((mConfiguration.openFlags & SQLiteDatabase.DISABLE_SHARE_PRIMARY_CONNECTION) != 0) {
+                        if (!waiter.mWantPrimaryConnection) {
+                            if (!nonPrimaryConnectionNotAvailable) {
+                                connection = tryAcquireNonPrimaryConnectionLocked(
+                                    waiter.mSql, waiter.mConnectionFlags); // might throw
+                                if (connection == null) {
+                                    nonPrimaryConnectionNotAvailable = true;
+                                }
+                            }
+                        } else {
+                            if (!primaryConnectionNotAvailable) {
+                                connection = tryAcquirePrimaryConnectionLocked(
+                                    waiter.mConnectionFlags); // might throw
+                                if (connection == null) {
+                                    primaryConnectionNotAvailable = true;
+                                }
+                            }
                         }
-                    }
-                    if (connection == null && !primaryConnectionNotAvailable) {
-                        connection = tryAcquirePrimaryConnectionLocked(
+                    } else {
+                        if (!waiter.mWantPrimaryConnection && !nonPrimaryConnectionNotAvailable) {
+                            connection = tryAcquireNonPrimaryConnectionLocked(
+                                waiter.mSql, waiter.mConnectionFlags); // might throw
+                            if (connection == null) {
+                                nonPrimaryConnectionNotAvailable = true;
+                            }
+                        }
+                        if (connection == null && !primaryConnectionNotAvailable) {
+                            connection = tryAcquirePrimaryConnectionLocked(
                                 waiter.mConnectionFlags); // might throw
-                        if (connection == null) {
-                            primaryConnectionNotAvailable = true;
+                            if (connection == null) {
+                                primaryConnectionNotAvailable = true;
+
+                            }
                         }
                     }
                     if (connection != null) {
