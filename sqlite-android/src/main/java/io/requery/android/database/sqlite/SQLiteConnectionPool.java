@@ -614,7 +614,7 @@ public final class SQLiteConnectionPool implements Closeable {
 
             // Try to acquire a connection.
             SQLiteConnection connection = null;
-            if ((mConfiguration.openFlags & SQLiteDatabase.DISABLE_SHARE_PRIMARY_CONNECTION) != 0) {
+            if (mConfiguration.disableSharePrimaryConnection) {
                 if (!wantPrimaryConnection) {
                     connection = tryAcquireNonPrimaryConnectionLocked(
                         sql, connectionFlags); // might throw
@@ -810,7 +810,7 @@ public final class SQLiteConnectionPool implements Closeable {
             } else {
                 try {
                     SQLiteConnection connection = null;
-                    if ((mConfiguration.openFlags & SQLiteDatabase.DISABLE_SHARE_PRIMARY_CONNECTION) != 0) {
+                    if (mConfiguration.disableSharePrimaryConnection) {
                         if (!waiter.mWantPrimaryConnection) {
                             if (!nonPrimaryConnectionNotAvailable) {
                                 connection = tryAcquireNonPrimaryConnectionLocked(

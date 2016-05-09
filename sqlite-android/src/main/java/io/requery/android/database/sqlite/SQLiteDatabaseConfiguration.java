@@ -62,6 +62,7 @@ public final class SQLiteDatabaseConfiguration {
      * The flags used to open the database.
      */
     public int openFlags;
+    public boolean disableSharePrimaryConnection = false;
 
 
     /**
@@ -165,6 +166,7 @@ public final class SQLiteDatabaseConfiguration {
         }
 
         openFlags = other.openFlags;
+        disableSharePrimaryConnection = other.disableSharePrimaryConnection;
         maxSqlCacheSize = other.maxSqlCacheSize;
         locale = other.locale;
         foreignKeyConstraintsEnabled = other.foreignKeyConstraintsEnabled;

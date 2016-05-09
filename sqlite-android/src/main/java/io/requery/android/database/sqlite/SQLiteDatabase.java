@@ -250,7 +250,6 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * @see #enableWriteAheadLogging
      */
     public static final int ENABLE_WRITE_AHEAD_LOGGING = 0x20000000;
-    public static final int DISABLE_SHARE_PRIMARY_CONNECTION = 0x00010000;
 
     /**
      * Absolute max value that can be set by {@link #setMaxSqlCacheSize(int)}.
@@ -306,6 +305,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
                 pool.close();
             }
         }
+        Log.d(TAG, "SQLite database disposed");
     }
 
     /**
@@ -654,7 +654,13 @@ public final class SQLiteDatabase extends SQLiteClosable {
      */
     public static SQLiteDatabase openDatabase(String path, CursorFactory factory, int flags,
             DatabaseErrorHandler errorHandler) {
+        return openDatabase(path, factory, flags, false, errorHandler);
+    }
+
+    public static SQLiteDatabase openDatabase(String path, CursorFactory factory, int flags, boolean disableSharePrimaryConnection,
+                                              DatabaseErrorHandler errorHandler) {
         SQLiteDatabaseConfiguration configuration = new SQLiteDatabaseConfiguration(path, flags);
+        configuration.disableSharePrimaryConnection = disableSharePrimaryConnection;
         SQLiteDatabase db = new SQLiteDatabase(configuration, factory, errorHandler);
         db.open();
         return db;

@@ -20,6 +20,8 @@ package io.requery.android.database;
 import android.database.CharArrayBuffer;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
+import android.util.Log;
+
 import io.requery.android.database.sqlite.SQLiteClosable;
 
 /**
@@ -28,7 +30,7 @@ import io.requery.android.database.sqlite.SQLiteClosable;
 @SuppressWarnings("unused")
 public class CursorWindow extends SQLiteClosable {
 
-    private static final int WINDOW_SIZE_KB = 1024;
+    private static final int WINDOW_SIZE_KB = 64;
 
     // This static member will be evaluated when first used.
     private static int sCursorWindowSize = -1;
@@ -65,6 +67,8 @@ public class CursorWindow extends SQLiteClosable {
 
     private static native String nativeGetName(long windowPtr);
 
+    private static final  boolean DEBUG = false;
+
     /**
      * Creates a new empty cursor window and gives it a name.
      * <p>
@@ -84,9 +88,15 @@ public class CursorWindow extends SQLiteClosable {
             sCursorWindowSize = WINDOW_SIZE_KB * 1024;
         }
         mWindowPtr = nativeCreate(mName, sCursorWindowSize);
+
+
         if (mWindowPtr == 0) {
             throw new CursorWindowAllocationException("Cursor window allocation of " +
                     (sCursorWindowSize / 1024) + " kb failed. ");
+        }
+
+        if (DEBUG) {
+            Log.d("CursorWindow", "created cursor window");
         }
     }
 
@@ -104,6 +114,9 @@ public class CursorWindow extends SQLiteClosable {
         if (mWindowPtr != 0) {
             nativeDispose(mWindowPtr);
             mWindowPtr = 0;
+            if (DEBUG) {
+                Log.d("CursorWindow", "disposed cursor window");
+            }
         }
     }
 
